@@ -10,3 +10,9 @@ export type TodoState = {
     isLoading: boolean;
     isError: boolean;
 };
+
+export type TodoListProps = {
+    fetchTodos: () => void;
+    todoList: Todo[];
+    isDone: boolean;
+};

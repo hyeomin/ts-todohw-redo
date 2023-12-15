@@ -1,16 +1,26 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { v4 } from "uuid";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import TodoList from "./components/CardList";
-import { addTodo } from "./redux/modules/todos";
 import { Todo } from "./types/TodoTypes";
 
 function App() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    const [todoList, setTodoList] = useState<Todo[]>([]);
+    const [todoList, setTodoList] = useState([]);
 
-    const dispatch = useDispatch();
+    const fetchTodos = async () => {
+        try {
+            const response = await axios.get(`http://localhost:4000/todos`);
+            console.log(response.data);
+            setTodoList(response.data);
+        } catch (error) {
+            console.log("Error:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchTodos();
+    }, []);
 
     const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
@@ -21,15 +31,22 @@ function App() {
         }
     };
 
-    const onSubmitHandler = (event: React.FormEvent<HTMLFormElement>) => {
+    const onSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const newTodo = {
-            id: v4(),
+        const newTodo: Omit<Todo, "id"> = {
             title,
             content,
             isDone: false,
         };
-        dispatch(addTodo(newTodo));
+
+        try {
+            await axios.post(`http://localhost:4000/todos`, newTodo);
+            fetchTodos();
+            setTitle("");
+            setContent("");
+        } catch (error) {
+            console.log("Error:", error);
+        }
     };
 
     return (
@@ -54,10 +71,19 @@ function App() {
                             placeholder="내용을 입력하세요."
                         />
                     </div>
-                    <button>추가하기</button>
+                    <button type="submit">추가하기</button>
                 </form>
             </div>
-            <TodoList />
+            <TodoList
+                fetchTodos={fetchTodos}
+                todoList={todoList}
+                isDone={false}
+            />
+            <TodoList
+                fetchTodos={fetchTodos}
+                todoList={todoList}
+                isDone={true}
+            />
         </div>
     );
 }
