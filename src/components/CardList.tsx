@@ -1,25 +1,34 @@
-import axios from "axios";
-import { TodoListProps } from "../types/TodoTypes";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { AppDispatch, useAppSelector } from "../redux/config/configStore";
+import {
+    __deleteTodo,
+    __fetchTodos,
+    __switchTodo,
+} from "../redux/modules/todos";
 
-function CardList({ fetchTodos, todoList, isDone }: TodoListProps) {
+function CardList({ isDone }: { isDone: boolean }) {
+    const dispatch: AppDispatch = useDispatch();
+    const todoList = useAppSelector((state) => state.todoList);
+
+    useEffect(() => {
+        dispatch(__fetchTodos());
+    }, []);
+
     const onSwitchStatusHandler = async (id: string, isDone: boolean) => {
-        await axios.patch(`http://localhost:4000/todos/${id}`, {
-            isDone: !isDone,
-        });
-        fetchTodos();
+        dispatch(__switchTodo({ id, isDone }));
     };
 
     const onDeleteHandler = async (id: string) => {
-        try {
-            const confirmed = window.confirm("삭제하시겠습니까?");
-            if (confirmed) {
-                await axios.delete(`http://localhost:4000/todos/${id}`);
-            }
-            fetchTodos();
-        } catch (error) {
-            console.log("Error", error);
+        const confirmed = window.confirm("삭제하시겠습니까?");
+        if (confirmed) {
+            dispatch(__deleteTodo(id));
         }
     };
+
+    if (!todoList) {
+        return <div>Loading ...</div>;
+    }
 
     return (
         <div className="card-container">

@@ -11,8 +11,7 @@ export type TodoState = {
     isError: boolean;
 };
 
-export type TodoListProps = {
-    fetchTodos: () => void;
-    todoList: Todo[];
+export type SwitchArgs = {
+    id: string;
     isDone: boolean;
 };

@@ -1,26 +1,15 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
 import TodoList from "./components/CardList";
+import { AppDispatch } from "./redux/config/configStore";
+import { __addTodo } from "./redux/modules/todos";
 import { Todo } from "./types/TodoTypes";
 
 function App() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    const [todoList, setTodoList] = useState([]);
 
-    const fetchTodos = async () => {
-        try {
-            const response = await axios.get(`http://localhost:4000/todos`);
-            console.log(response.data);
-            setTodoList(response.data);
-        } catch (error) {
-            console.log("Error:", error);
-        }
-    };
-
-    useEffect(() => {
-        fetchTodos();
-    }, []);
+    const dispatch: AppDispatch = useDispatch();
 
     const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
@@ -38,15 +27,7 @@ function App() {
             content,
             isDone: false,
         };
-
-        try {
-            await axios.post(`http://localhost:4000/todos`, newTodo);
-            fetchTodos();
-            setTitle("");
-            setContent("");
-        } catch (error) {
-            console.log("Error:", error);
-        }
+        dispatch(__addTodo(newTodo));
     };
 
     return (
@@ -74,16 +55,8 @@ function App() {
                     <button type="submit">추가하기</button>
                 </form>
             </div>
-            <TodoList
-                fetchTodos={fetchTodos}
-                todoList={todoList}
-                isDone={false}
-            />
-            <TodoList
-                fetchTodos={fetchTodos}
-                todoList={todoList}
-                isDone={true}
-            />
+            <TodoList isDone={false} />
+            <TodoList isDone={true} />
         </div>
     );
 }
