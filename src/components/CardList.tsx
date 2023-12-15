@@ -1,32 +1,42 @@
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch, useAppSelector } from "../redux/config/configStore";
-import {
-    __deleteTodo,
-    __fetchTodos,
-    __switchTodo,
-} from "../redux/modules/todos";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { deleteTodo, fetchTodos, switchTodo } from "../api/todoApi";
+import { Todo } from "../types/TodoTypes";
 
 function CardList({ isDone }: { isDone: boolean }) {
-    const dispatch: AppDispatch = useDispatch();
-    const todoList = useAppSelector((state) => state.todoList);
+    const { isLoading, data: todoList } = useQuery({
+        queryKey: ["todos"],
+        queryFn: fetchTodos,
+    });
 
-    useEffect(() => {
-        dispatch(__fetchTodos());
-    }, []);
+    const queryClient = useQueryClient();
 
-    const onSwitchStatusHandler = async (id: string, isDone: boolean) => {
-        dispatch(__switchTodo({ id, isDone }));
+    const switchMuation = useMutation({
+        mutationFn: switchTodo,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["todos"] });
+        },
+    });
+
+    const onSwitchStatusHandler = (id: string, isDone: boolean) => {
+        switchMuation.mutate({ id, isDone });
     };
 
-    const onDeleteHandler = async (id: string) => {
+    const deleteMutation = useMutation({
+        mutationFn: deleteTodo,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["todos"] });
+        },
+    });
+
+    const onDeleteHandler = (id: string) => {
         const confirmed = window.confirm("삭제하시겠습니까?");
         if (confirmed) {
-            dispatch(__deleteTodo(id));
+            deleteMutation.mutate(id);
         }
     };
 
-    if (!todoList) {
+    if (isLoading) {
         return <div>Loading ...</div>;
     }
 
@@ -34,8 +44,8 @@ function CardList({ isDone }: { isDone: boolean }) {
         <div className="card-container">
             <h2>{isDone ? "Done" : "In Progress"}</h2>
             {todoList
-                .filter((item) => item.isDone === isDone)
-                .map((item) => {
+                .filter((item: Todo) => item.isDone === isDone)
+                .map((item: Todo) => {
                     return (
                         <div className="single-card" key={item.id}>
                             <h2>{item.title}</h2>

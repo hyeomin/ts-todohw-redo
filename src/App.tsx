@@ -1,15 +1,20 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { addTodo } from "./api/todoApi";
 import TodoList from "./components/CardList";
-import { AppDispatch } from "./redux/config/configStore";
-import { __addTodo } from "./redux/modules/todos";
 import { Todo } from "./types/TodoTypes";
 
 function App() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
 
-    const dispatch: AppDispatch = useDispatch();
+    const queryClient = useQueryClient();
+    const addMutation = useMutation({
+        mutationFn: addTodo,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["todos"] });
+        },
+    });
 
     const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
@@ -27,7 +32,7 @@ function App() {
             content,
             isDone: false,
         };
-        dispatch(__addTodo(newTodo));
+        addMutation.mutate(newTodo);
     };
 
     return (
