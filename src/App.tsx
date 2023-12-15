@@ -34,6 +34,26 @@ function App() {
         setTodoList([...todoList, newTodo]);
     };
 
+    const onSwitchStatusHandler = (id: string) => {
+        const switched = todoList.map((item) => {
+            if (item.id === id) {
+                return { ...item, isDone: !item.isDone };
+            }
+            return item;
+        });
+        setTodoList(switched);
+    };
+
+    const onDeleteHandler = (id: string) => {
+        const confirmed = window.confirm("삭제하시겠습니까?");
+        if (confirmed) {
+            const deleted = todoList.filter((item) => {
+                return item.id !== id;
+            });
+            setTodoList(deleted);
+        }
+    };
+
     return (
         <div>
             <div className="form-container">
@@ -66,8 +86,14 @@ function App() {
                         <div className="single-card" key={item.id}>
                             <h2>{item.title}</h2>
                             <p>{item.content}</p>
-                            <button>{item.isDone ? "취소" : "완료"}</button>
-                            <button>삭제</button>
+                            <button
+                                onClick={() => onSwitchStatusHandler(item.id)}
+                            >
+                                {item.isDone ? "취소" : "완료"}
+                            </button>
+                            <button onClick={() => onDeleteHandler(item.id)}>
+                                삭제
+                            </button>
                         </div>
                     );
                 })}
