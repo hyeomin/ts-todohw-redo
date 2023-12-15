@@ -1,9 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReactDOM from "react-dom/client";
-import { Provider } from "react-redux";
 import App from "./App";
 import GlobalStyles from "./GlobalStyles";
-import store from "./redux/config/configStore";
 import reportWebVitals from "./reportWebVitals";
 
 const queryClient = new QueryClient();
@@ -13,10 +11,8 @@ const root = ReactDOM.createRoot(
 );
 root.render(
     <QueryClientProvider client={queryClient}>
-        <Provider store={store}>
-            <App />
-            <GlobalStyles />
-        </Provider>
+        <App />
+        <GlobalStyles />
     </QueryClientProvider>
 );
 
